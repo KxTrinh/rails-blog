@@ -10,9 +10,19 @@ require "open-uri"
 User.destroy_all
 Post.destroy_all
 
-User.create!(email: "kevin@mail.com",
+User.create!(username: 'Mak',
+  email: "kevin@mail.com",
   password: "123456",
   admin: true)
+
+10.times do |_i|
+  User.create!(username: Faker::Name.unique.first_name,
+  email: Faker::Internet.unique.email,
+  password: "123456",
+  admin: false)
+end
+
+pseudo_rng = Random.new
 
 25.times do |i|
   post = Post.new
@@ -27,6 +37,18 @@ User.create!(email: "kevin@mail.com",
   # post.banner.attach(io: open("https://picsum.photos/1920/1080"), filename: "#{i}_banner.jpg")
   post.views = Faker::Number.between(from: 1, to: 5000)
   post.save!
+
+  (2 + pseudo_rng.rand(8)).times do |_j|
+    comment = post.comments.build(body: Faker::Lorem.paragraph_by_chars(number: 500),
+                                 user: User.find(2 + pseudo_rng.rand(10)))
+    comment.save
+    pseudo_rng.rand(5).times do |_k|
+      nested_comment = comment.comments.build(body: Faker::Lorem.paragraph_by_chars(number: 500),
+                                              user: User.find(2 + pseudo_rng.rand(10)),
+                                              reply: true)
+      nested_comment.save
+    end
+  end
 end
 
  puts "Finished !"
